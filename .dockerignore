@@ -1,0 +1,27 @@
+# Virtual environments
+.venv/
+venv/
+qa/
+
+# Python cache
+__pycache__/
+*.py[cod]
+
+# Git
+.git/
+.gitignore
+
+# Environment / secrets
+.env
+
+# IDE
+.vscode/
+
+# macOS
+.DS_Store
+
+# Testing 
+.pytest_cache/
+
+# DeepEval / temporary files
+.deepeval/

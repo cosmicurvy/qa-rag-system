@@ -1,0 +1,28 @@
+# Environment variables / secrets
+.env
+
+# Python virtual environments
+.venv/
+/qa
+
+# Python cache
+__pycache__/
+*.py[cod]
+*$py.class
+
+
+# Testing 
+.pytest_cache/
+
+# IDEs / editors
+.vscode/
+
+# macOS
+.DS_Store
+
+# DeepEval
+.deepeval/
+
+# Local model/vector-store artifacts
+chroma/
+chroma_db/

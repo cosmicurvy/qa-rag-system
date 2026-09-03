@@ -1,0 +1,34 @@
+services:
+  backend:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    container_name: qa-rag-backend
+    command: uvicorn backend:app --host 0.0.0.0 --port 8000
+    ports:
+      - "8000:8000"
+    environment:
+      GEMINI_API_KEY: ${GEMINI_API_KEY}
+      # add langsmith api keys so it can send Dockerized RAG traces to LangSmith
+      LANGSMITH_API_KEY: ${LANGSMITH_API_KEY}
+      LANGSMITH_TRACING: ${LANGSMITH_TRACING}
+      LANGSMITH_PROJECT: ${LANGSMITH_PROJECT}
+    volumes:
+      - ./data:/app/data
+    restart: unless-stopped
+
+  frontend:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    container_name: qa-rag-frontend
+    command: streamlit run app.py --server.port=8501 --server.address=0.0.0.0
+    ports:
+      - "8501:8501"
+    environment:
+      API_URL: "http://backend:8000/ask"
+    env_file:
+      - .env
+    depends_on:
+      - backend
+    restart: unless-stopped
