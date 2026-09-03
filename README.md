@@ -1,214 +1,75 @@
 # Question Answering RAG System
 
-An end-to-end Retrieval-Augmented Generation (RAG) system that allows users to ask questions about two influential NLP research papers:
+An end-to-end Retrieval-Augmented Generation (RAG) system for question answering over two influential NLP research papers:
 
-* **Attention Is All You Need** — Vaswani et al.
-* **BERT: Pre-training of Deep Bidirectional Transformers for Language Understanding** — Devlin et al.
+* *Attention Is All You Need* — Vaswani et al.
+* *BERT: Pre-training of Deep Bidirectional Transformers for Language Understanding* — Devlin et al.
 
-The system retrieves relevant sections from the research papers and uses them as context for generating grounded answers. It also includes automated RAG evaluation, backend API testing, Docker containerization, and a CI/CD pipeline.
+The system retrieves relevant passages from the papers and uses them as context to generate grounded answers. The application is built as a modular Python system with an API backend, interactive frontend, automated testing, RAG evaluation, Docker, and CI/CD.
 
-## Features
+## Overview
 
-* Question answering over research papers using RAG
-* Modular Python implementation instead of a notebook-based workflow
-* Recursive text chunking with `RecursiveCharacterTextSplitter`
-* Semantic embeddings using Hugging Face embeddings
-* Vector storage and similarity search using ChromaDB
-* Retrieval and generation pipeline
-* RAG evaluation using DeepEval
-* FastAPI backend
-* Streamlit interactive frontend
-* Automated tests for backend and RAG components
+The system enables users to ask questions about the research papers and receive answers based on retrieved document context rather than relying solely on the language model's internal knowledge.
+
+**RAG Flow:**
+
+`Research Papers → Chunking → Embeddings → ChromaDB → Retrieval → Context → Generation → Answer`
+
+## Evaluation
+
+RAG performance was evaluated using **DeepEval** across three questions using:
+
+* **Answer Relevancy** — relevance of the generated answer to the question.
+* **Faithfulness** — whether the generated answer is supported by the retrieved context.
+* **Contextual Relevancy** — relevance of the retrieved context to the question.
+
+### Results
+
+| Metric               | Average Score |
+| -------------------- | ------------: |
+| Answer Relevancy     |      **1.00** |
+| Faithfulness         |      **0.87** |
+| Contextual Relevancy |      **0.70** |
+
+The results indicate that the generated answers were **highly relevant to the questions**, while faithfulness was also strong overall. Contextual relevancy was comparatively lower, indicating an opportunity to improve the retrieval component by reducing irrelevant retrieved passages.
+
+### Evaluation Examples
+
+| Question                                           | Answer Relevancy | Faithfulness | Contextual Relevancy |
+| -------------------------------------------------- | ---------------: | -----------: | -------------------: |
+| Why does the Transformer use multi-head attention? |             1.00 |         0.60 |                 0.91 |
+| How does BERT use bidirectional context?           |             1.00 |         1.00 |                 0.70 |
+| What are BERT's two pre-training tasks?            |             1.00 |         1.00 |                 0.50 |
+
+## Application
+
+The system provides a **Streamlit** interface for asking questions and a **FastAPI** backend for serving the RAG pipeline.
+
+`Streamlit → FastAPI → RAG Pipeline → ChromaDB → LLM → Response`
+
+Automated tests using **Pytest** validate the RAG components and FastAPI endpoint.
+
+## Engineering
+
+* Modular Python implementation
+* Automated RAG evaluation with DeepEval
+* Automated testing with Pytest
 * Dockerized application
-* CI/CD pipeline for automated testing and deployment
+* CI/CD pipeline using GitHub Actions
+* FastAPI REST API
+* Streamlit user interface
 
-## RAG Pipeline
+## Tech Stack
 
-The application follows a modular RAG workflow:
-
-**Research Papers → Document Loading → Text Splitting → Embeddings → ChromaDB → Retriever → Context → Generation → Answer**
-
-### 1. Document Loading
-
-The two research papers are loaded as the knowledge source for the system.
-
-The documents are:
-
-* *Attention Is All You Need*
-* *BERT: Pre-training of Deep Bidirectional Transformers for Language Understanding*
-
-### 2. Text Chunking
-
-The extracted document content is divided into smaller chunks using LangChain's `RecursiveCharacterTextSplitter`.
-
-Chunking allows the retriever to search for relevant portions of the papers instead of processing the complete documents for every query.
-
-### 3. Embeddings
-
-Each chunk is converted into a numerical vector representation using `HuggingFaceEmbeddings`.
-
-These embeddings capture the semantic meaning of the text and allow the system to retrieve information based on meaning rather than exact keyword matching.
-
-### 4. Vector Database
-
-The generated embeddings are stored in **ChromaDB**, which acts as the vector database.
-
-When a user asks a question, the query is embedded and compared against the stored document embeddings to identify the most relevant chunks.
-
-### 5. Retrieval
-
-A retriever searches the Chroma vector database and returns relevant chunks from the research papers.
-
-The retrieved context is then passed to the generation component.
-
-### 6. Generation
-
-The retrieved context is provided to the language model along with the user's question.
-
-The model generates an answer based on the retrieved information, allowing the system to answer questions grounded in the source documents.
-
-## RAG Evaluation
-
-The system is evaluated using **DeepEval** to measure the quality of generated answers and retrieved context.
-
-The following metrics are used:
-
-### Answer Relevancy
-
-Measures how relevant the generated answer is to the user's question.
-
-A higher score indicates that the response directly addresses the question without unnecessary information.
-
-### Faithfulness
-
-Measures whether the generated answer is supported by the retrieved context.
-
-This is particularly important for RAG systems because it helps identify unsupported or hallucinated information.
-
-### Contextual Relevancy
-
-Measures how relevant the retrieved context is to the user's question.
-
-This helps evaluate the retrieval component independently from answer generation.
-
-Together, these metrics provide insight into both the **retrieval quality** and **generation quality** of the RAG pipeline.
-
-## Testing
-
-The project includes automated tests for both the RAG components and the FastAPI backend.
-
-Testing helps verify that:
-
-* RAG components behave as expected
-* Retrieval functionality works correctly
-* API endpoints return the expected responses
-* Changes to the application do not unintentionally break existing functionality
-
-## Backend
-
-The backend is implemented using **FastAPI**.
-
-The API provides an interface between the frontend and the RAG pipeline.
-
-A typical request flow is:
-
-**User Question → FastAPI → RAG Pipeline → Retrieved Context → Generated Answer → API Response**
-
-FastAPI also makes it possible to expose the RAG system as an API that can later be consumed by other applications.
-
-## Frontend
-
-The user interface is built with **Streamlit**.
-
-Users can enter questions about the two research papers and receive answers generated by the RAG pipeline.
-
-The frontend communicates with the FastAPI backend rather than directly coupling the user interface with the underlying RAG components.
-
-## Docker
-
-The application is containerized using Docker.
-
-Docker provides a consistent environment for running the application and helps avoid dependency and environment-related issues between development and deployment environments.
-
-The Dockerized application can be used for:
-
-* Local development
-* Testing
-* CI/CD workflows
-* Cloud deployment
-
-## CI/CD
-
-A CI/CD pipeline is integrated into the project to automate the software development workflow.
-
-The pipeline can automatically:
-
-1. Install project dependencies
-2. Run automated tests
-3. Validate the application
-4. Build the Docker image
-5. Prepare the application for deployment
-
-This makes the project closer to a production-oriented ML application rather than a standalone experimentation project.
-
-## Technologies Used
-
-| Category         | Technology              |
-| ---------------- | ----------------------- |
-| Language         | Python                  |
-| RAG Framework    | LangChain               |
-| Embeddings       | Hugging Face Embeddings |
-| Vector Database  | ChromaDB                |
-| RAG Evaluation   | DeepEval                |
-| Backend          | FastAPI                 |
-| Frontend         | Streamlit               |
-| Testing          | Pytest                  |
-| Containerization | Docker                  |
-| CI/CD            | GitHub Actions          |
-| Version Control  | Git & GitHub            |
+**Python | LangChain | Hugging Face | ChromaDB | DeepEval | FastAPI | Streamlit | Pytest | Docker | GitHub Actions | Git**
 
 ## Example Questions
 
-The system can answer questions such as:
+* Why does the Transformer use multi-head attention?
+* What is the purpose of positional encoding?
+* How does BERT use bidirectional context?
 
-* Why does the Transformer use multi-head attention instead of a single attention mechanism?
-* What is the purpose of positional encoding in the Transformer?
-* How does self-attention work in the Transformer architecture?
-* What is the main difference between BERT and traditional language models?
-* Why does BERT use bidirectional representations?
-* What is Masked Language Modeling?
-* What is Next Sentence Prediction?
-* How is BERT different from the Transformer architecture described in *Attention Is All You Need*?
+## Key Takeaways
 
-## Key Learning Outcomes
+This project demonstrates practical experience in **RAG development, semantic retrieval, vector databases, LLM evaluation, API development, automated testing, containerization, and CI/CD**.
 
-Through this project, I worked with:
-
-* End-to-end RAG pipeline development
-* Semantic search and vector databases
-* Embedding-based information retrieval
-* RAG evaluation and hallucination detection
-* Modular Python application design
-* REST API development
-* Automated testing
-* Docker containerization
-* CI/CD automation
-* Deployment-oriented ML engineering
-
-## Future Improvements
-
-Potential improvements include:
-
-* Adding more research papers and document collections
-* Experimenting with different embedding models
-* Comparing different chunk sizes and overlap strategies
-* Evaluating different retrieval strategies
-* Adding reranking to improve retrieval quality
-* Adding conversational memory
-* Adding authentication and API security
-* Monitoring RAG performance after deployment
-* Adding experiment tracking for evaluation results
-
-## License
-
-This project is intended for educational and portfolio purposes.
