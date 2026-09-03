@@ -51,11 +51,6 @@ jobs:
           docker build -t qa-rag-system:latest .
 
       - name: Validate Docker Compose
-        env:
-          GEMINI_API_KEY: "dummy"
-          LANGSMITH_API_KEY: "dummy"
-          LANGSMITH_TRACING: "false"
-          LANGSMITH_PROJECT: "ci-test"
         run: |
           docker compose config
 
